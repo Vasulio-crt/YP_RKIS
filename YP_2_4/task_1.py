@@ -34,10 +34,10 @@ class DataBase:
 	def view_all_students(self):
 		with sqlite3.connect("main.db") as con:
 			cur = con.cursor()
-			cur.execute("SELECT id, first_name, last_name, patronymic FROM students")
-			print("id\tИмя\tФамилия\tОтчество")
+			cur.execute("SELECT id, first_name, last_name, patronymic, group_st FROM students")
+			print("id\tИмя\tФамилия\tОтчество\tГруппа")
 			for student in cur:
-				print(f"{student[0]}\t{student[1]}\t{student[2]}\t{"" if student[3] == None else student[3]}")
+				print(f"{student[0]}\t{student[1]}\t{student[2]}\t{"" if student[3] == None else student[3]}\t{student[4]}")
 
 	def view_one_student(self):
 		with sqlite3.connect("main.db") as con:
@@ -54,6 +54,60 @@ class DataBase:
 			print(f"\nИмя - {cur[1]}\nФамилия - {cur[2]}\nОтчество - {cur[3]}\nГруппа - {cur[4]}")
 			ratings = tuple(map(int, cur[5].split(",")))
 			print(f"Оценки - {ratings[0],ratings[1],ratings[2],ratings[3]}; средний балл = {sum(ratings)/4}")
+
+	def edit_student(self):
+		with sqlite3.connect("main.db") as con:
+			cur = con.cursor()
+			id_stud = int(input("Введите id студента: "))
+			stud = cur.execute(f"SELECT * FROM students WHERE id={id_stud}").fetchone()
+			if len(stud) == 0:
+				print("Нет такого id")
+				return None
+
+			data_edit = []
+			for i in range(1, len(stud)-1):
+				data = input(f"Прошлые данные {stud[i]}: ")
+				if data == "":
+					data_edit.append(stud[i])
+				else:
+					data_edit.append(data)
+			data = input(f"Оценки студента ({stud[5]}): ")
+			if data != "":
+				while not re.match(r"^[2-5],[2-5],[2-5],[2-5]$", data):
+					data = input("Оценки студента (4,4,4,4): ")
+				data_edit.append(data)
+			else:
+				data_edit.append(stud[5])
+			data_edit.append(id_stud)
+			data_edit = tuple(data_edit)
+
+			cur.execute("""UPDATE students SET first_name=?, last_name=?, patronymic=?,
+				group_st=?, grades=? WHERE id=?""", data_edit)
+			con.commit()
+
+	def delete_student(self):
+		with sqlite3.connect("main.db") as con:
+			cur = con.cursor()
+			self.view_all_students()
+			id_stud = int(input("Введите id студента: "))
+			cur.execute(f"DELETE FROM students WHERE id={id_stud}")
+			con.commit()
+
+	def view_average_score_students(self):
+		with sqlite3.connect("main.db") as con:
+			cur = con.cursor()
+			cur_copy = cur.execute("SELECT DISTINCT group_st FROM students").fetchall()
+			for grop in cur_copy:
+				print(grop[0], end="  ")
+			group = input("\nВведите номер группы: ")
+			cur_copy = cur.execute(f"SELECT first_name, last_name, grades FROM students WHERE group_st={group}").fetchall()
+			print("Имя\tФамилия\tСр. балл")
+			for stud in cur_copy:
+				ratings = tuple(map(int, stud[2].split(",")))
+				print(f"{stud[0]}\t{stud[1]}\t{sum(ratings)/4}")
+
+
+# SELECT DISTINCT group_st FROM students
 
 def print_action():
 	print("1. Добавление нового студента")
@@ -73,7 +127,8 @@ def main():
 		try:
 			action = int(input("\nВыберете действие: "))
 		except ValueError:
-			return main()
+			print("\033[31mОшибка ввода!\033[0m")
+			return None
 		match action:
 			case 1:
 				first_name = input("Имя студента: ")
@@ -89,6 +144,14 @@ def main():
 				db.view_all_students()
 			case 3:
 				db.view_one_student()
+			case 4:
+				db.edit_student()
+			case 5:
+				db.delete_student()
+			case 6:
+				db.view_average_score_students()
+			case 7:
+				print_action()
 			case _:
 				break
 
