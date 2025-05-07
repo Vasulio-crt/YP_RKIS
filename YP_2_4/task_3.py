@@ -46,7 +46,7 @@ def main():
 		try:
 			action = int(input("\nВыберете действие: "))
 		except ValueError:
-			print("\033[31mОшибка ввода!\033[0m")
+			print("\033[31mОШИБКА ВВОДА\033[0m❗")
 			return None
 		match action:
 			case 1:
