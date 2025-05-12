@@ -1,6 +1,7 @@
 import requests, os, sqlite3, random
 import telebot # pip install pyTelegramBotAPI
-from telebot.types import Message
+from telebot.types import Message, CallbackQuery
+from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 # @fakes_data_bot
 
@@ -97,6 +98,14 @@ def random_app_name(size = 3):
     data = response.json()
     return data
 
+def gen_markup():
+    markup = InlineKeyboardMarkup()
+    markup.row_width = 1
+    markup.add(InlineKeyboardButton("Легкий", callback_data="1"),
+        InlineKeyboardButton("Средний", callback_data="2"),
+        InlineKeyboardButton("Сложный", callback_data="3"))
+    return markup
+
 
 TOKEN = str(os.environ.get('TOKEN'))
 bot = telebot.TeleBot(TOKEN)
@@ -105,7 +114,7 @@ print("\033[44mSTART BOT\033[0m")
 @bot.message_handler(commands=['start'])
 def start_command(message: Message):
     message_id = message.chat.id
-    bot.send_message(message_id, "Приветствуем вас в нашем боте.")
+    bot.send_message(message_id, f"Приветствуем вас в нашем боте.\n{message_id}")
 
 
 @bot.message_handler(commands=['fake_male', 'fakeMale'])
@@ -135,13 +144,19 @@ def generate_password(message: Message):
 @bot.message_handler(commands=["select_password"])
 def select_password(message: Message):
     message_id = message.chat.id
-    bot.send_message(message_id, "Выберете сложность пароля:\n1. Легкий\n2. Средний\n3. Сложный")
-    bot.register_next_step_handler(message, select_password_2)
+    bot.send_message(message_id, "Выберете сложность пароля:", reply_markup=gen_markup())
 
-def select_password_2(message: Message):
-    x = str(message.text)[0]
-    data = random_password_choice(x)
-    bot.send_message(message.chat.id, f"Пароль: {data["password"]}")
+@bot.callback_query_handler(func=lambda call: True)
+def callback_inline(call: CallbackQuery):
+    data = dict()
+    if call.data == "1":
+        data = random_password_choice("1")
+    elif call.data == "2":
+        data = random_password_choice("2")
+    elif call.data == "3":
+        data = random_password_choice("3")
+    bot.delete_message(call.message.chat.id, call.message.id)
+    bot.send_message(call.message.chat.id, f"Пароль: {data["password"]}")
 
 @bot.message_handler(commands=['app_name'])
 def app_name(message: Message):
