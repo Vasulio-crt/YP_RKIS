@@ -114,7 +114,7 @@ print("\033[44mSTART BOT\033[0m")
 @bot.message_handler(commands=['start'])
 def start_command(message: Message):
     message_id = message.chat.id
-    bot.send_message(message_id, f"Приветствуем вас в нашем боте.\n{message_id}")
+    bot.send_message(message_id, f"Приветствуем вас в нашем боте.")
 
 
 @bot.message_handler(commands=['fake_male', 'fakeMale'])
