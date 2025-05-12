@@ -2,6 +2,8 @@ import requests, os, sqlite3, random
 import telebot # pip install pyTelegramBotAPI
 from telebot.types import Message
 
+# @fakes_data_bot
+
 class DataBase:
     def __init__(self, db_name='bot_data.db'):
         self.con = sqlite3.connect(db_name)
@@ -63,10 +65,28 @@ def fake_person_female():
         data["Phone"], data["DateOfBirth"], data["Gender"]))
     return data
 
-def random_password(length = 16):
+def random_password():
     db = DataBase()
     base_url = 'https://api.genratr.com/?uppercase&lowercase&numbers'
-    response = requests.get(base_url, params={"length": length})
+    response = requests.get(base_url, params={"length": 16})
+    data = response.json()
+    db.add_password(data["password"])
+    return data
+
+def random_password_choice(x: str):
+    base_url = "https://api.genratr.com/?numbers&lowercase"
+    match x:
+        case "1":
+            response = requests.get(base_url, params={
+                "length": 12})
+        case "3":
+            response = requests.get(base_url, params={
+                "length": 22,
+                "uppercase": 1,
+                "special": 1})
+        case _:
+            return random_password()
+    db = DataBase()
     data = response.json()
     db.add_password(data["password"])
     return data
@@ -112,6 +132,16 @@ def generate_password(message: Message):
     message_id = message.chat.id
     bot.send_message(message_id, f"Пароль: {data["password"]}")
 
+@bot.message_handler(commands=["select_password"])
+def select_password(message: Message):
+    message_id = message.chat.id
+    bot.send_message(message_id, "Выберете сложность пароля:\n1. Легкий\n2. Средний\n3. Сложный")
+    bot.register_next_step_handler(message, select_password_2)
+
+def select_password_2(message: Message):
+    x = str(message.text)[0]
+    data = random_password_choice(x)
+    bot.send_message(message.chat.id, f"Пароль: {data["password"]}")
 
 @bot.message_handler(commands=['app_name'])
 def app_name(message: Message):
