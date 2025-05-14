@@ -114,15 +114,15 @@ print("\033[44mSTART BOT\033[0m")
 @bot.message_handler(commands=['start'])
 def start_command(message: Message):
     message_id = message.chat.id
-    bot.send_message(message_id, f"Приветствуем вас в нашем боте.")
+    bot.send_message(message_id, "Приветствуем вас в нашем боте.")
 
 
 @bot.message_handler(commands=['fake_male', 'fakeMale'])
 def fake_male(message: Message):
     data = fake_person_male()
     message_id = message.chat.id
-    text = f"Имя: {data["FirstName"]}\nФамилия: {data["LastName"]}\nemail: {data["Email"]}\n"
-    text = text + f"Телефон: {data["Phone"]}\nДень рождения: {data["DateOfBirth"]}"
+    text = f"Имя: {data['FirstName']}\nФамилия: {data['LastName']}\nemail: {data['Email']}\n"
+    text = text + f"Телефон: {data['Phone']}\nДень рождения: {data['DateOfBirth']}"
     bot.send_message(message_id, text)
 
 
@@ -130,8 +130,8 @@ def fake_male(message: Message):
 def fake_female(message: Message):
     data = fake_person_female()
     message_id = message.chat.id
-    text = f"Имя: {data["FirstName"]}\nФамилия: {data["LastName"]}\nemail: {data["Email"]}\n"
-    text = text + f"Телефон: {data["Phone"]}\nДень рождения: {data["DateOfBirth"]}"
+    text = f"Имя: {data['FirstName']}\nФамилия: {data['LastName']}\nemail: {data['Email']}\n"
+    text = text + f"Телефон: {data['Phone']}\nДень рождения: {data['DateOfBirth']}"
     bot.send_message(message_id, text)
     
 
@@ -139,7 +139,8 @@ def fake_female(message: Message):
 def generate_password(message: Message):
     data = random_password()
     message_id = message.chat.id
-    bot.send_message(message_id, f"Пароль: {data["password"]}")
+    bot.send_message(message_id, f"Пароль: {data['password']}")
+
 
 @bot.message_handler(commands=["select_password"])
 def select_password(message: Message):
@@ -156,13 +157,14 @@ def callback_inline(call: CallbackQuery):
     elif call.data == "3":
         data = random_password_choice("3")
     bot.delete_message(call.message.chat.id, call.message.id)
-    bot.send_message(call.message.chat.id, f"Пароль: {data["password"]}")
+    bot.send_message(call.message.chat.id, f"Пароль: {data['password']}")
+
 
 @bot.message_handler(commands=['app_name'])
 def app_name(message: Message):
     message_id = message.chat.id
     data = random_app_name()
-    text = f"Название приложения:\n1 - {data[0]["app_name"]}\n2 - {data[1]["app_name"]}\n3 - {data[2]["app_name"]}"
+    text = f"Название приложения:\n1 - {data[0]['app_name']}\n2 - {data[1]['app_name']}\n3 - {data[2]['app_name']}"
     bot.send_message(message_id, text)
 
 
