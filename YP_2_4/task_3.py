@@ -15,7 +15,7 @@ class DataBase:
 				id INTEGER PRIMARY KEY,
 				cpu TEXT NOT NULL,
 				ram TEXT NOT NULL,
-				dick TEXT NOT NULL)
+				disk TEXT NOT NULL)
 			""")
 
 	def add_monitor(self, data: tuple):
@@ -27,7 +27,7 @@ class DataBase:
 	def view_monitor(self):
 		cur = self.con.cursor()
 		cur.execute("SELECT * FROM monitor")
-		print("CPU\tRAM\tDICK\ttime")
+		print("CPU\tRAM\tDISK\ttime")
 		for data in cur:
 			print(f"{data[1]}%\t{data[2]}\t{data[3]}%\t{datetime.fromtimestamp(data[0])}")
 
